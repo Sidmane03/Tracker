@@ -7,6 +7,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Zap,
+  Database,
+  Plus,
 } from 'lucide-react'
 
 interface NavItem {
@@ -19,16 +21,23 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: 'Dashboard',    icon: <LayoutDashboard size={18} />, page: 'dashboard' },
   { label: 'Skills',       icon: <TreePine size={18} />,        page: 'skills' },
-  { label: 'Log Practice', icon: <BookOpen size={18} />,        page: 'log' },
+  { label: 'Practice Logs',icon: <BookOpen size={18} />,        page: 'log' },
   { label: 'Career Paths', icon: <Target size={18} />,          page: 'career' },
 ]
 
 interface SidebarProps {
   currentPage: string
   onNavigate: (page: string) => void
+  onOpenQuickLog?: () => void
+  onOpenDataManagement?: () => void
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => {
+export const Sidebar: React.FC<SidebarProps> = ({
+  currentPage,
+  onNavigate,
+  onOpenQuickLog,
+  onOpenDataManagement,
+}) => {
   const [collapsed, setCollapsed] = useState(false)
 
   return (
@@ -79,6 +88,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
         )}
       </div>
 
+      {/* ── Quick Log Action Button */}
+      <div className="p-2">
+        <button
+          onClick={onOpenQuickLog}
+          className="w-full flex items-center justify-center gap-2 rounded-[var(--radius-md)] cursor-pointer text-white font-medium shadow-[0_0_15px_var(--accent-glow)] transition-transform active:scale-95"
+          style={{
+            height: 36,
+            background: 'var(--accent)',
+          }}
+          title={collapsed ? 'Quick Log Practice' : undefined}
+        >
+          <Plus size={16} className="flex-shrink-0" />
+          {!collapsed && <span className="text-xs font-semibold">Quick Log</span>}
+        </button>
+      </div>
+
       {/* ── Navigation */}
       <nav className="flex-1 overflow-hidden p-2 space-y-0.5">
         {NAV_ITEMS.map((item) => {
@@ -115,13 +140,40 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
         })}
       </nav>
 
+      {/* ── Data & Backup */}
+      <div style={{ padding: '4px 8px', borderTop: '1px solid var(--border)' }}>
+        <button
+          onClick={onOpenDataManagement}
+          className="w-full flex items-center gap-2.5 rounded-[var(--radius-md)] cursor-pointer text-left"
+          style={{
+            height: 34,
+            padding: collapsed ? '0 10px' : '0 10px',
+            justifyContent: collapsed ? 'center' : 'flex-start',
+            color: 'var(--text-muted)',
+            background: 'transparent',
+          }}
+          title={collapsed ? 'Data & Backup' : undefined}
+          onMouseEnter={(e) => {
+            ;(e.currentTarget as HTMLElement).style.background = 'var(--surface-2)'
+            ;(e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'
+          }}
+          onMouseLeave={(e) => {
+            ;(e.currentTarget as HTMLElement).style.background = 'transparent'
+            ;(e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'
+          }}
+        >
+          <Database size={16} className="flex-shrink-0" />
+          {!collapsed && <span className="text-xs font-medium truncate">Data &amp; Backup</span>}
+        </button>
+      </div>
+
       {/* ── Collapse toggle */}
-      <div style={{ padding: 8, borderTop: '1px solid var(--border)' }}>
+      <div style={{ padding: '4px 8px 8px 8px' }}>
         <button
           onClick={() => setCollapsed((v) => !v)}
-          className="w-full flex items-center justify-center rounded-[var(--radius-md)]"
+          className="w-full flex items-center justify-center rounded-[var(--radius-md)] cursor-pointer"
           style={{
-            height: 32,
+            height: 30,
             color: 'var(--text-muted)',
             background: 'transparent',
           }}

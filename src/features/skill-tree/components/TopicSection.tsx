@@ -9,6 +9,7 @@ interface TopicSectionProps {
   onConfidenceChange: (id: string, v: ConceptConfidence) => void
   onArchive: (id: string) => void
   onAddSubtopic: (topicId: string, title: string) => void
+  onQuickLog?: (subtopicId: string) => void
 }
 
 export const TopicSection: React.FC<TopicSectionProps> = ({
@@ -17,6 +18,7 @@ export const TopicSection: React.FC<TopicSectionProps> = ({
   onConfidenceChange,
   onArchive,
   onAddSubtopic,
+  onQuickLog,
 }) => {
   const [expanded, setExpanded] = useState(false)
   const [adding, setAdding] = useState(false)
@@ -45,7 +47,7 @@ export const TopicSection: React.FC<TopicSectionProps> = ({
       {/* ── Topic header */}
       <button
         onClick={() => setExpanded((v) => !v)}
-        className="w-full flex items-center gap-2 px-2 py-1.5 rounded-[var(--radius-sm)] text-left group"
+        className="w-full flex items-center gap-2 px-2 py-1.5 rounded-[var(--radius-sm)] text-left group cursor-pointer"
         style={{ background: 'transparent', color: 'var(--text-secondary)' }}
         onMouseEnter={(e) => {
           ;(e.currentTarget as HTMLElement).style.background = 'var(--surface-2)'
@@ -83,6 +85,7 @@ export const TopicSection: React.FC<TopicSectionProps> = ({
               subtopic={sub}
               onConfidenceChange={onConfidenceChange}
               onArchive={onArchive}
+              onQuickLog={onQuickLog}
             />
           ))}
 
@@ -111,6 +114,7 @@ export const TopicSection: React.FC<TopicSectionProps> = ({
                 disabled={!newTitle.trim()}
                 style={{ color: 'var(--success)' }}
                 title="Add"
+                className="cursor-pointer"
               >
                 <Check size={13} />
               </button>
@@ -118,6 +122,7 @@ export const TopicSection: React.FC<TopicSectionProps> = ({
                 onClick={() => { setAdding(false); setNewTitle('') }}
                 style={{ color: 'var(--text-muted)' }}
                 title="Cancel"
+                className="cursor-pointer"
               >
                 <X size={13} />
               </button>
@@ -125,7 +130,7 @@ export const TopicSection: React.FC<TopicSectionProps> = ({
           ) : (
             <button
               onClick={() => setAdding(true)}
-              className="flex items-center gap-1.5 px-2 py-1 text-xs rounded-[var(--radius-sm)] w-full"
+              className="flex items-center gap-1.5 px-2 py-1 text-xs rounded-[var(--radius-sm)] w-full cursor-pointer"
               style={{ color: 'var(--text-muted)' }}
               onMouseEnter={(e) => {
                 ;(e.currentTarget as HTMLElement).style.color = 'var(--accent-light)'

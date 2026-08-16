@@ -2,7 +2,11 @@ import React from 'react'
 import { useSkillTree } from '../hooks/useSkillTree'
 import { CategoryCard } from './CategoryCard'
 
-export const SkillTree: React.FC = () => {
+interface SkillTreeProps {
+  onQuickLog?: (subtopicId: string) => void
+}
+
+export const SkillTree: React.FC<SkillTreeProps> = ({ onQuickLog }) => {
   const { categoryOrder, categories } = useSkillTree()
 
   return (
@@ -10,7 +14,7 @@ export const SkillTree: React.FC = () => {
       {categoryOrder.map((id) => {
         const category = categories[id]
         if (!category) return null
-        return <CategoryCard key={id} category={category} />
+        return <CategoryCard key={id} category={category} onQuickLog={onQuickLog} />
       })}
     </div>
   )

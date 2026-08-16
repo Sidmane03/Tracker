@@ -7,6 +7,7 @@ import {
 import type { Category } from '@/types/domain'
 import { TopicSection } from './TopicSection'
 import { useSkillTree } from '../hooks/useSkillTree'
+import { useStore } from '@/store'
 
 // ── Icon lookup by Lucide name string ───────────────────────────────────────
 const ICON_MAP: Record<string, React.ReactNode> = {
@@ -27,21 +28,23 @@ function catColor(colorToken: string): string {
 
 interface CategoryCardProps {
   category: Category
+  onQuickLog?: (subtopicId: string) => void
 }
 
-export const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
+export const CategoryCard: React.FC<CategoryCardProps> = ({ category, onQuickLog }) => {
   const [expanded, setExpanded] = useState(false)
   const { topics, subtopics, setSubtopicConfidence, addCustomSubtopic, archiveSubtopic } =
     useSkillTree()
+  const getCategoryReadiness = useStore((s) => s.getCategoryReadiness)
 
   const activeTopics = category.topicIds.filter((id) => topics[id] && !topics[id].isArchived)
 
-  // Total subtopics + mastered count for the category summary
   const allSubtopicIds = activeTopics.flatMap((tid) => topics[tid]?.subtopicIds ?? [])
   const allSubs = allSubtopicIds.map((sid) => subtopics[sid]).filter((s) => s && !s.isArchived)
-  const mastered = allSubs.filter((s) => s.conceptConfidence >= 4).length
   const total = allSubs.length
-  const pct = total > 0 ? Math.round((mastered / total) * 100) : 0
+
+  // Live dynamic category readiness computed from engine
+  const readinessPct = getCategoryReadiness(category.id)
 
   const color = catColor(category.color)
   const icon = ICON_MAP[category.icon] ?? <Code2 size={16} />
@@ -59,7 +62,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
       {/* ── Category header */}
       <button
         onClick={() => setExpanded((v) => !v)}
-        className="w-full flex items-center gap-3 p-4 text-left"
+        className="w-full flex items-center gap-3 p-4 text-left cursor-pointer"
         style={{ background: 'transparent' }}
         onMouseEnter={(e) =>
           ((e.currentTarget as HTMLElement).style.background = 'var(--surface-2)')
@@ -83,40 +86,46 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
 
         {/* Title + description */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span
-              className="text-sm font-semibold"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              {category.title}
-            </span>
-            <span
-              className="text-xs"
-              style={{ color: 'var(--text-muted)' }}
-            >
-              {activeTopics.length} topics · {total} subtopics
-            </span>
-          </div>
-          {/* Mini progress bar */}
-          {total > 0 && (
-            <div className="flex items-center gap-2 mt-1.5">
-              <div
-                className="flex-1 rounded-full overflow-hidden"
-                style={{ height: 3, background: 'var(--surface-3)' }}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span
+                className="text-sm font-semibold"
+                style={{ color: 'var(--text-primary)' }}
               >
-                <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{
-                    width: `${pct}%`,
-                    background: pct >= 70 ? 'var(--success)' : pct >= 40 ? color : 'var(--warning)',
-                  }}
-                />
-              </div>
-              <span className="text-xs flex-shrink-0" style={{ color: 'var(--text-muted)', minWidth: 32 }}>
-                {mastered}/{total}
+                {category.title}
+              </span>
+              <span
+                className="text-xs"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                {activeTopics.length} topics · {total} subtopics
               </span>
             </div>
-          )}
+            <span
+              className="text-xs font-mono font-semibold"
+              style={{
+                color: readinessPct >= 75 ? 'var(--success)' : readinessPct >= 45 ? 'var(--accent-light)' : 'var(--text-secondary)'
+              }}
+            >
+              {readinessPct}% Readiness
+            </span>
+          </div>
+
+          {/* Dynamic readiness progress bar */}
+          <div className="flex items-center gap-2 mt-2">
+            <div
+              className="flex-1 rounded-full overflow-hidden"
+              style={{ height: 4, background: 'var(--surface-3)' }}
+            >
+              <div
+                className="h-full rounded-full transition-all duration-500"
+                style={{
+                  width: `${readinessPct}%`,
+                  background: readinessPct >= 75 ? 'var(--success)' : readinessPct >= 45 ? color : 'var(--warning)',
+                }}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Expand chevron */}
@@ -146,6 +155,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
                 onConfidenceChange={setSubtopicConfidence}
                 onArchive={archiveSubtopic}
                 onAddSubtopic={addCustomSubtopic}
+                onQuickLog={onQuickLog}
               />
             ))}
           </div>

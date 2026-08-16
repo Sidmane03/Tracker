@@ -1,10 +1,19 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
-import type { AppState, UserPreferences, ConceptConfidence, PracticeLog } from '@/types/domain'
+import type { AppState, UserPreferences, ConceptConfidence, PracticeLog, Subtopic } from '@/types/domain'
 import { SEED_CURRICULUM } from '@/data/curriculum'
 import { CAREER_ROLES } from '@/data/careerRoles'
+import {
+  calculateSubtopicScore,
+  calculateTopicScore,
+  calculateCategoryScore,
+  calculateOverallScore,
+  calculateRetentionScore,
+  isRevisionDue,
+  type ScoreBreakdown,
+} from '@/lib/engine'
 
-// ─── Action interface ─────────────────────────────────────────────────────────
+// ─── Action & Selector Interface ──────────────────────────────────────────────
 
 interface StoreActions {
   // Preferences
@@ -19,6 +28,13 @@ interface StoreActions {
   // Practice logs
   addPracticeLog: (log: Omit<PracticeLog, 'id' | 'timestamp'>) => void
   deletePracticeLog: (logId: string) => void
+
+  // Dynamic Calculated Selectors
+  getSubtopicReadiness: (subtopicId: string) => ScoreBreakdown
+  getTopicReadiness: (topicId: string) => number
+  getCategoryReadiness: (categoryId: string) => number
+  getOverallReadiness: () => number
+  getRevisionDueSubtopics: () => Subtopic[]
 
   // Data portability
   exportData: () => string
@@ -140,11 +156,71 @@ export const useStore = create<AppState & StoreActions>()(
       deletePracticeLog: (logId) =>
         set((s) => ({ practiceLogs: s.practiceLogs.filter((l) => l.id !== logId) })),
 
+      // ── Dynamic Computed Selectors
+      getSubtopicReadiness: (subtopicId) => {
+        const state = get()
+        const subtopic = state.subtopics[subtopicId]
+        if (!subtopic) {
+          return { conceptScore: 0, masteryScore: 0, retentionScore: 0, volumeScore: 0, totalReadiness: 0 }
+        }
+        const halfLife = state.preferences.decayHalfLifeDays || 21
+        const retention = calculateRetentionScore(
+          subtopic.lastPracticedAt,
+          halfLife,
+          Date.now(),
+          subtopic.conceptConfidence
+        )
+        return calculateSubtopicScore(subtopic, state.practiceLogs, retention)
+      },
+
+      getTopicReadiness: (topicId) => {
+        const state = get()
+        const topic = state.topics[topicId]
+        if (!topic) return 0
+        const subtopicList = topic.subtopicIds.map((id) => state.subtopics[id]).filter(Boolean)
+        const subScores: Record<string, ScoreBreakdown> = {}
+        for (const s of subtopicList) {
+          subScores[s.id] = get().getSubtopicReadiness(s.id)
+        }
+        return calculateTopicScore(subtopicList, subScores)
+      },
+
+      getCategoryReadiness: (categoryId) => {
+        const state = get()
+        const category = state.categories[categoryId]
+        if (!category) return 0
+        const topicScores = category.topicIds.map((tid) => get().getTopicReadiness(tid))
+        return calculateCategoryScore(topicScores)
+      },
+
+      getOverallReadiness: () => {
+        const state = get()
+        const categoryScores = state.categoryOrder.map((cid) => get().getCategoryReadiness(cid))
+        return calculateOverallScore(categoryScores)
+      },
+
+      getRevisionDueSubtopics: () => {
+        const state = get()
+        const dueList: Subtopic[] = []
+        for (const sub of Object.values(state.subtopics)) {
+          if (sub.isArchived) continue
+          const scores = get().getSubtopicReadiness(sub.id)
+          if (isRevisionDue(scores.retentionScore, scores.conceptScore, scores.masteryScore)) {
+            dueList.push(sub)
+          }
+        }
+        return dueList
+      },
+
       // ── Export the entire state as JSON
       exportData: () => {
-        const { setPreferences, setSubtopicConfidence, addCustomSubtopic, archiveSubtopic,
+        const {
+          setPreferences, setSubtopicConfidence, addCustomSubtopic, archiveSubtopic,
           updateSubtopicNotes, addPracticeLog, deletePracticeLog,
-          exportData, importData, resetToDefaults, ...data } = get()
+          getSubtopicReadiness, getTopicReadiness, getCategoryReadiness,
+          getOverallReadiness, getRevisionDueSubtopics,
+          exportData, importData, resetToDefaults, ...data
+        } = get()
         return JSON.stringify(data, null, 2)
       },
 

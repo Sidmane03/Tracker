@@ -1,24 +1,51 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { SkillsPage } from '@/pages/SkillsPage'
 import { PracticeLogPage } from '@/pages/PracticeLogPage'
 import { CareerPage } from '@/pages/CareerPage'
+import { QuickLogModal } from '@/features/practice-log/components/QuickLogModal'
+import { DataManagementModal } from '@/components/settings/DataManagementModal'
 
 type Page = 'dashboard' | 'skills' | 'log' | 'career'
 
-function renderPage(page: Page): React.ReactNode {
-  switch (page) {
-    case 'dashboard': return <DashboardPage />
-    case 'skills':    return <SkillsPage />
-    case 'log':       return <PracticeLogPage />
-    case 'career':    return <CareerPage />
-    default:          return <DashboardPage />
-  }
-}
-
 export const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('skills')
+  const [quickLogOpen, setQuickLogOpen] = useState(false)
+  const [preselectedSubtopicId, setPreselectedSubtopicId] = useState<string | undefined>()
+  const [dataModalOpen, setDataModalOpen] = useState(false)
+
+  const handleOpenQuickLog = (subtopicId?: string) => {
+    setPreselectedSubtopicId(subtopicId)
+    setQuickLogOpen(true)
+  }
+
+  // Global keyboard shortcut: Alt + L to quick log
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.altKey && e.key.toLowerCase() === 'l') || (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'l')) {
+        e.preventDefault()
+        handleOpenQuickLog()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  const renderPage = () => {
+    switch (currentPage) {
+      case 'dashboard':
+        return <DashboardPage />
+      case 'skills':
+        return <SkillsPage onOpenQuickLog={handleOpenQuickLog} />
+      case 'log':
+        return <PracticeLogPage />
+      case 'career':
+        return <CareerPage />
+      default:
+        return <DashboardPage />
+    }
+  }
 
   return (
     <div
@@ -28,10 +55,28 @@ export const App: React.FC = () => {
       <Sidebar
         currentPage={currentPage}
         onNavigate={(p) => setCurrentPage(p as Page)}
+        onOpenQuickLog={() => handleOpenQuickLog()}
+        onOpenDataManagement={() => setDataModalOpen(true)}
       />
+
       <div className="flex-1 overflow-hidden min-w-0">
-        {renderPage(currentPage)}
+        {renderPage()}
       </div>
+
+      {/* ── Global Modals */}
+      <QuickLogModal
+        isOpen={quickLogOpen}
+        onClose={() => {
+          setQuickLogOpen(false)
+          setPreselectedSubtopicId(undefined)
+        }}
+        preselectedSubtopicId={preselectedSubtopicId}
+      />
+
+      <DataManagementModal
+        isOpen={dataModalOpen}
+        onClose={() => setDataModalOpen(false)}
+      />
     </div>
   )
 }
