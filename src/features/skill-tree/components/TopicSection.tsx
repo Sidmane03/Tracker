@@ -10,6 +10,7 @@ interface TopicSectionProps {
   onArchive: (id: string) => void
   onAddSubtopic: (topicId: string, title: string) => void
   onQuickLog?: (subtopicId: string) => void
+  onInspect?: (subtopicId: string) => void
 }
 
 export const TopicSection: React.FC<TopicSectionProps> = ({
@@ -19,6 +20,7 @@ export const TopicSection: React.FC<TopicSectionProps> = ({
   onArchive,
   onAddSubtopic,
   onQuickLog,
+  onInspect,
 }) => {
   const [expanded, setExpanded] = useState(false)
   const [adding, setAdding] = useState(false)
@@ -86,6 +88,7 @@ export const TopicSection: React.FC<TopicSectionProps> = ({
               onConfidenceChange={onConfidenceChange}
               onArchive={onArchive}
               onQuickLog={onQuickLog}
+              onInspect={onInspect}
             />
           ))}
 

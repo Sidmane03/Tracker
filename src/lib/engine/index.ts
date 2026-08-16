@@ -1,3 +1,6 @@
 export * from './types'
 export * from './scoring'
 export * from './decay'
+export * from './analytics'
+export * from './recommendations'
+export * from './career'

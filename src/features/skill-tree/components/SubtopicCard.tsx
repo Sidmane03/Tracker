@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Archive, AlertCircle, Plus } from 'lucide-react'
+import { Archive, AlertCircle, Plus, Info } from 'lucide-react'
 import { StarRating } from '@/components/ui/StarRating'
 import { CONFIDENCE_LABELS } from '@/types/domain'
 import type { Subtopic, ConceptConfidence } from '@/types/domain'
@@ -11,6 +11,7 @@ interface SubtopicCardProps {
   onConfidenceChange: (id: string, v: ConceptConfidence) => void
   onArchive: (id: string) => void
   onQuickLog?: (subtopicId: string) => void
+  onInspect?: (subtopicId: string) => void
 }
 
 export const SubtopicCard: React.FC<SubtopicCardProps> = ({
@@ -18,6 +19,7 @@ export const SubtopicCard: React.FC<SubtopicCardProps> = ({
   onConfidenceChange,
   onArchive,
   onQuickLog,
+  onInspect,
 }) => {
   const [hovered, setHovered] = useState(false)
   const getSubtopicReadiness = useStore((s) => s.getSubtopicReadiness)
@@ -52,22 +54,28 @@ export const SubtopicCard: React.FC<SubtopicCardProps> = ({
     >
       {/* Status or Revision indicator */}
       {status === 'Revision Due' ? (
-        <span title="Revision Due — Retention score has decayed!" className="flex-shrink-0">
+        <span
+          title="Revision Due — Retention score has decayed! Click to inspect breakdown."
+          onClick={() => onInspect?.(subtopic.id)}
+          className="flex-shrink-0 cursor-pointer"
+        >
           <AlertCircle size={14} className="text-[var(--warning)] animate-pulse" />
         </span>
       ) : (
         <div
-          className="flex-shrink-0 rounded-full"
+          onClick={() => onInspect?.(subtopic.id)}
+          className="flex-shrink-0 rounded-full cursor-pointer"
           style={{ width: 6, height: 6, background: readinessColor }}
-          title={`Readiness: ${scores.totalReadiness}% (${status})`}
+          title={`Readiness: ${scores.totalReadiness}% (${status}) — Click to inspect`}
         />
       )}
 
-      {/* Title */}
+      {/* Title (clickable to inspect) */}
       <span
-        className="flex-1 text-xs font-medium truncate"
+        onClick={() => onInspect?.(subtopic.id)}
+        className="flex-1 text-xs font-medium truncate cursor-pointer hover:text-[var(--accent-light)] transition-colors"
         style={{ color: 'var(--text-primary)' }}
-        title={`${subtopic.title} • Concept: ${scores.conceptScore}%, Mastery: ${scores.masteryScore}%, Retention: ${scores.retentionScore}%, Volume: ${scores.volumeScore}%`}
+        title={`${subtopic.title} • Concept: ${scores.conceptScore}%, Mastery: ${scores.masteryScore}%, Retention: ${scores.retentionScore}%, Volume: ${scores.volumeScore}% (Click to inspect)`}
       >
         {subtopic.title}
       </span>
@@ -84,15 +92,16 @@ export const SubtopicCard: React.FC<SubtopicCardProps> = ({
         </button>
       )}
 
-      {/* Mini score pill */}
+      {/* Mini score pill (clickable to inspect) */}
       <span
-        className="text-[11px] font-mono font-medium px-1.5 py-0.5 rounded flex-shrink-0"
+        onClick={() => onInspect?.(subtopic.id)}
+        className="text-[11px] font-mono font-medium px-1.5 py-0.5 rounded flex-shrink-0 cursor-pointer hover:border-[var(--accent)] transition-colors"
         style={{
           background: 'var(--surface-1)',
           color: readinessColor,
           border: '1px solid var(--border)',
         }}
-        title={`Total Readiness: ${scores.totalReadiness}%\n• Concept: ${scores.conceptScore}%\n• Mastery: ${scores.masteryScore}%\n• Retention: ${scores.retentionScore}%\n• Volume: ${scores.volumeScore}%`}
+        title={`Total Readiness: ${scores.totalReadiness}%\n• Concept: ${scores.conceptScore}%\n• Mastery: ${scores.masteryScore}%\n• Retention: ${scores.retentionScore}%\n• Volume: ${scores.volumeScore}%\nClick to open detailed breakdown`}
       >
         {scores.totalReadiness}%
       </span>
@@ -105,6 +114,17 @@ export const SubtopicCard: React.FC<SubtopicCardProps> = ({
           size={12}
         />
       </div>
+
+      {/* Inspect Info button on hover */}
+      {onInspect && (
+        <button
+          onClick={() => onInspect(subtopic.id)}
+          className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer p-0.5 text-[var(--text-muted)] hover:text-[var(--accent-light)]"
+          title="Inspect score breakdown"
+        >
+          <Info size={12} />
+        </button>
+      )}
 
       {/* Archive button — visible on hover */}
       <button

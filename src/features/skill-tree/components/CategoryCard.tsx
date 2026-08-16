@@ -29,9 +29,14 @@ function catColor(colorToken: string): string {
 interface CategoryCardProps {
   category: Category
   onQuickLog?: (subtopicId: string) => void
+  onInspect?: (subtopicId: string) => void
 }
 
-export const CategoryCard: React.FC<CategoryCardProps> = ({ category, onQuickLog }) => {
+export const CategoryCard: React.FC<CategoryCardProps> = ({
+  category,
+  onQuickLog,
+  onInspect,
+}) => {
   const [expanded, setExpanded] = useState(false)
   const { topics, subtopics, setSubtopicConfidence, addCustomSubtopic, archiveSubtopic } =
     useSkillTree()
@@ -156,6 +161,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ category, onQuickLog
                 onArchive={archiveSubtopic}
                 onAddSubtopic={addCustomSubtopic}
                 onQuickLog={onQuickLog}
+                onInspect={onInspect}
               />
             ))}
           </div>

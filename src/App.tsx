@@ -6,18 +6,24 @@ import { PracticeLogPage } from '@/pages/PracticeLogPage'
 import { CareerPage } from '@/pages/CareerPage'
 import { QuickLogModal } from '@/features/practice-log/components/QuickLogModal'
 import { DataManagementModal } from '@/components/settings/DataManagementModal'
+import { ScoreBreakdownModal } from '@/features/skill-tree/components/ScoreBreakdownModal'
 
 type Page = 'dashboard' | 'skills' | 'log' | 'career'
 
 export const App: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState<Page>('skills')
+  const [currentPage, setCurrentPage] = useState<Page>('dashboard')
   const [quickLogOpen, setQuickLogOpen] = useState(false)
   const [preselectedSubtopicId, setPreselectedSubtopicId] = useState<string | undefined>()
+  const [inspectSubtopicId, setInspectSubtopicId] = useState<string | undefined>()
   const [dataModalOpen, setDataModalOpen] = useState(false)
 
   const handleOpenQuickLog = (subtopicId?: string) => {
     setPreselectedSubtopicId(subtopicId)
     setQuickLogOpen(true)
+  }
+
+  const handleInspectSubtopic = (subtopicId: string) => {
+    setInspectSubtopicId(subtopicId)
   }
 
   // Global keyboard shortcut: Alt + L to quick log
@@ -35,15 +41,37 @@ export const App: React.FC = () => {
   const renderPage = () => {
     switch (currentPage) {
       case 'dashboard':
-        return <DashboardPage />
+        return (
+          <DashboardPage
+            onNavigate={(p) => setCurrentPage(p as Page)}
+            onOpenQuickLog={handleOpenQuickLog}
+            onInspectSubtopic={handleInspectSubtopic}
+          />
+        )
       case 'skills':
-        return <SkillsPage onOpenQuickLog={handleOpenQuickLog} />
+        return (
+          <SkillsPage
+            onOpenQuickLog={handleOpenQuickLog}
+            onInspectSubtopic={handleInspectSubtopic}
+          />
+        )
       case 'log':
         return <PracticeLogPage />
       case 'career':
-        return <CareerPage />
+        return (
+          <CareerPage
+            onNavigateToSkills={() => setCurrentPage('skills')}
+            onOpenQuickLog={() => handleOpenQuickLog()}
+          />
+        )
       default:
-        return <DashboardPage />
+        return (
+          <DashboardPage
+            onNavigate={(p) => setCurrentPage(p as Page)}
+            onOpenQuickLog={handleOpenQuickLog}
+            onInspectSubtopic={handleInspectSubtopic}
+          />
+        )
     }
   }
 
@@ -71,6 +99,13 @@ export const App: React.FC = () => {
           setPreselectedSubtopicId(undefined)
         }}
         preselectedSubtopicId={preselectedSubtopicId}
+      />
+
+      <ScoreBreakdownModal
+        isOpen={Boolean(inspectSubtopicId)}
+        onClose={() => setInspectSubtopicId(undefined)}
+        subtopicId={inspectSubtopicId}
+        onOpenQuickLog={handleOpenQuickLog}
       />
 
       <DataManagementModal
