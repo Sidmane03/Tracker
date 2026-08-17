@@ -52,7 +52,7 @@
 }
 
 /* ─── Reset & Base ───────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* Tailwind preflight handles reset, do not use unlayered universal resets */
 
 html, body, #root {
   height: 100%;
