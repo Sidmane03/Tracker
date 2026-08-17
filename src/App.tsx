@@ -76,10 +76,7 @@ export const App: React.FC = () => {
   }
 
   return (
-    <div
-      className="flex h-screen overflow-hidden"
-      style={{ background: 'var(--surface-0)' }}
-    >
+    <div className="flex h-screen overflow-hidden bg-[#0a1020] text-[#f2f5ff]">
       <Sidebar
         currentPage={currentPage}
         onNavigate={(p) => setCurrentPage(p as Page)}

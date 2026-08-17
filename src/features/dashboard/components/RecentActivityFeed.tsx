@@ -1,6 +1,5 @@
 import React from 'react'
 import { useStore } from '@/store'
-import { Card } from '@/components/ui'
 import { formatDistanceToNow, format, isToday, isYesterday } from 'date-fns'
 
 interface RecentActivityFeedProps {
@@ -40,16 +39,16 @@ export const RecentActivityFeed: React.FC<RecentActivityFeedProps> = ({
   onNavigateToLogs,
 }) => {
   const { practiceLogs, subtopics, categories } = useStore()
-  const recent = practiceLogs.slice(0, 6)
+  const recent = practiceLogs.slice(0, 5)
 
   return (
-    <Card className="rounded-[20px] border border-white/[0.08] bg-[#10192b] p-5 sm:p-6">
+    <section className="rounded-[20px] border border-white/[0.08] bg-[#10192b] p-5 sm:p-6">
       <div className="mb-5 flex items-end justify-between">
         <div>
-          <p className="text-[11px] font-bold tracking-[0.14em] text-[var(--text-muted)] uppercase">
+          <p className="text-[11px] font-bold tracking-[0.14em] text-[#8c98b1] uppercase">
             Keep moving
           </p>
-          <h2 className="mt-1 text-xl font-semibold tracking-[-0.04em] text-[var(--text-primary)]">
+          <h2 className="mt-1 text-xl font-semibold tracking-[-0.04em] text-white">
             Recent practice
           </h2>
         </div>
@@ -63,8 +62,8 @@ export const RecentActivityFeed: React.FC<RecentActivityFeedProps> = ({
       </div>
 
       {recent.length === 0 ? (
-        <div className="py-10 text-center text-xs text-[var(--text-muted)]">
-          No practice logs yet. Complete a quick practice session to see it here!
+        <div className="py-8 text-center text-xs text-[#8290aa]">
+          No practice logs yet. Use Quick Log to record your first session!
         </div>
       ) : (
         <div className="divide-y divide-white/[0.07]">
@@ -73,11 +72,11 @@ export const RecentActivityFeed: React.FC<RecentActivityFeedProps> = ({
             const cat = categories[log.categoryId]
             const short = getCategoryShortCode(cat?.title, log.categoryId)
 
-            const outcomeText =
+            const outcomeLabel =
               log.outcome === 'Solved'
-                ? 'Solved cleanly'
+                ? `Solved ${log.timeSpentMinutes ? `(${log.timeSpentMinutes}m)` : ''}`
                 : log.outcome === 'Struggled'
-                ? 'Struggled / Reviewed'
+                ? 'Reviewed'
                 : 'Needed help'
 
             return (
@@ -85,34 +84,28 @@ export const RecentActivityFeed: React.FC<RecentActivityFeedProps> = ({
                 key={log.id}
                 className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
               >
-                {/* Mini category avatar */}
-                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#17223a] text-[11px] font-semibold text-[#b8c3dd] mono border border-white/[0.05]">
+                {/* MiniIcon matching Figma */}
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#17223a] text-[11px] font-semibold text-[#b8c3dd] mono border border-white/[0.04]">
                   {short}
                 </span>
 
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-x-2">
-                    <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
+                    <p className="text-sm font-semibold text-white truncate">
                       {sub?.title || log.subtopicId}
                     </p>
                     <span className="text-[11px] text-[#8290aa]">
                       {cat?.title || log.categoryId}
                     </span>
                   </div>
-                  <p className="mt-0.5 text-xs text-[#92a0b8]">
-                    <span className="text-[#c1cbde] font-medium">{outcomeText}</span>
+                  <p className="mt-1 text-xs text-[#92a0b8]">
+                    <span className="text-[#c1cbde]">{outcomeLabel}</span>
                     <span className="mx-1.5 text-[#52617b]">&bull;</span>
                     <span>{log.difficulty}</span>
-                    {log.timeSpentMinutes > 0 && (
-                      <>
-                        <span className="mx-1.5 text-[#52617b]">&bull;</span>
-                        <span className="mono text-[11px]">{log.timeSpentMinutes}m</span>
-                      </>
-                    )}
                   </p>
                 </div>
 
-                <time className="shrink-0 text-right text-[11px] text-[#7f8da7] mono">
+                <time className="shrink-0 text-right text-[11px] text-[#7f8da7]">
                   {formatActivityTime(log.timestamp)}
                 </time>
               </div>
@@ -120,6 +113,6 @@ export const RecentActivityFeed: React.FC<RecentActivityFeedProps> = ({
           })}
         </div>
       )}
-    </Card>
+    </section>
   )
 }

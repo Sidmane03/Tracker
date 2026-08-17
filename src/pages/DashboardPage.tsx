@@ -6,10 +6,7 @@ import { CategoryProgressGrid } from '@/features/dashboard/components/CategoryPr
 import { StrengthWeaknessPanel } from '@/features/dashboard/components/StrengthWeaknessPanel'
 import { SkillGapsRadar } from '@/features/dashboard/components/SkillGapsRadar'
 import { RecentActivityFeed } from '@/features/dashboard/components/RecentActivityFeed'
-import { useStore } from '@/store'
-import { getDashboardSummaryMetrics } from '@/lib/engine'
 import { useDashboardScores } from '@/hooks/useDashboardScores'
-import { Plus } from 'lucide-react'
 
 interface DashboardPageProps {
   onNavigate?: (page: string, filter?: string) => void
@@ -32,7 +29,7 @@ function getFormattedDate(): string {
       day: 'numeric',
     }).format(new Date())
   } catch {
-    return 'Today'
+    return 'Monday, August 17'
   }
 }
 
@@ -41,97 +38,75 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   onOpenQuickLog,
   onInspectSubtopic,
 }) => {
-  const store = useStore()
-  const overallReadiness = store.getOverallReadiness()
-
   // Centralized subtopic readiness scores computation
   const { subtopicList, scores } = useDashboardScores()
-
-  const metrics = getDashboardSummaryMetrics(store, scores)
-  const primaryRole = store.careerRoles.find((r) => r.id === store.preferences.primaryCareerTarget)
 
   const greeting = getGreeting()
   const formattedDate = getFormattedDate()
 
   return (
-    <PageWrapper
-      title="Dashboard"
-      actions={
-        <button
-          type="button"
-          onClick={() => onOpenQuickLog?.()}
-          className="flex items-center gap-2 rounded-xl bg-[#7c83ff] px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-[0_6px_20px_rgba(124,131,255,.28)] transition hover:-translate-y-0.5 hover:bg-[#8d93ff] cursor-pointer"
-        >
-          <Plus size={16} />
-          <span>Quick log</span>
-        </button>
-      }
-    >
-      <div className="space-y-8 max-w-6xl pb-10">
-        {/* ── Page Hero Greeting matching Figma */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <PageWrapper hideHeader={true}>
+      <div className="mx-auto max-w-[1500px]">
+        {/* ── Page Header matching Figma Image 1 */}
+        <header className="mb-8 flex items-center justify-between gap-4">
           <div>
             <p className="mb-1 text-xs font-medium tracking-[0.12em] text-[#8491ab] uppercase">
               {formattedDate}
             </p>
             <h1 className="text-2xl font-semibold tracking-[-0.045em] text-white sm:text-[28px]">
-              {greeting}, Learner
+              {greeting}, Harsh
             </h1>
           </div>
-        </div>
+          <button
+            type="button"
+            onClick={() => onOpenQuickLog?.()}
+            className="flex shrink-0 items-center gap-2 rounded-xl bg-[#7c83ff] px-4 py-3 text-sm font-bold text-white shadow-[0_9px_20px_rgba(78,88,218,.25)] transition hover:-translate-y-0.5 hover:bg-[#8d93ff] focus:outline-none focus:ring-2 focus:ring-[#aeb2ff] focus:ring-offset-2 focus:ring-offset-[#0a1020] cursor-pointer"
+          >
+            <span className="text-lg leading-none">+</span> Quick log
+          </button>
+        </header>
 
-        {/* ── Section 1: Skill Progress Overview (Figma "Skill progress") */}
-        <section>
+        {/* ── Section 1: Skill progress (Figma Image 1) */}
+        <section className="mb-8">
           <HeroReadinessGauge
-            overallReadiness={overallReadiness}
-            metrics={metrics}
-            primaryRoleTitle={primaryRole?.title}
-            onNavigateToSkills={(cid) => onNavigate?.('skills', cid)}
-            onNavigateToCareer={() => onNavigate?.('career')}
-            onOpenQuickLog={() => onOpenQuickLog?.()}
-          />
-        </section>
-
-        {/* ── Section 2: Today's Recommended Focus (Figma "Today's focus") */}
-        <section>
-          <TodaysFocusWidget
-            subtopicList={subtopicList}
-            scores={scores}
-            onOpenQuickLog={(sid) => onOpenQuickLog?.(sid)}
-            onInspectSubtopic={(sid) => onInspectSubtopic?.(sid)}
-          />
-        </section>
-
-        {/* ── Section 3: Category Progress (Figma "Category progress") */}
-        <section>
-          <CategoryProgressGrid
             onNavigateToSkills={(cid) => onNavigate?.('skills', cid)}
           />
         </section>
 
-        {/* ── Section 4: 2-Column Analytics (Figma "Pattern check" vs "Act next") */}
-        <section className="grid gap-4 xl:grid-cols-[1.12fr_.88fr]">
+        {/* ── Section 2: Today's focus (Figma Image 1) */}
+        <TodaysFocusWidget
+          subtopicList={subtopicList}
+          scores={scores}
+          onOpenQuickLog={onOpenQuickLog}
+          onInspectSubtopic={onInspectSubtopic}
+        />
+
+        {/* ── Section 3: Category progress (Figma Image 2) */}
+        <CategoryProgressGrid
+          onNavigateToSkills={(cid) => onNavigate?.('skills', cid)}
+        />
+
+        {/* ── Section 4: 2-Column Analytics (Figma Image 2 & 3) */}
+        <section className="mb-9 grid gap-4 xl:grid-cols-[1.12fr_.88fr]">
           <StrengthWeaknessPanel
             subtopicList={subtopicList}
             scores={scores}
-            onOpenQuickLog={(sid) => onOpenQuickLog?.(sid)}
-            onInspectSubtopic={(sid) => onInspectSubtopic?.(sid)}
+            onOpenQuickLog={onOpenQuickLog}
+            onInspectSubtopic={onInspectSubtopic}
           />
           <SkillGapsRadar
             subtopicList={subtopicList}
             scores={scores}
-            onOpenQuickLog={(sid) => onOpenQuickLog?.(sid)}
-            onInspectSubtopic={(sid) => onInspectSubtopic?.(sid)}
+            onOpenQuickLog={onOpenQuickLog}
+            onInspectSubtopic={onInspectSubtopic}
             onNavigateToSkills={() => onNavigate?.('skills')}
           />
         </section>
 
-        {/* ── Section 5: Recent Practice Activity (Figma "Recent practice") */}
-        <section>
-          <RecentActivityFeed
-            onNavigateToLogs={() => onNavigate?.('log')}
-          />
-        </section>
+        {/* ── Section 5: Recent practice (Figma Image 3) */}
+        <RecentActivityFeed
+          onNavigateToLogs={() => onNavigate?.('log')}
+        />
       </div>
     </PageWrapper>
   )
