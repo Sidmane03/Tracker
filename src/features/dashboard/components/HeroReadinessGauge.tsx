@@ -1,5 +1,6 @@
 import React from 'react'
-import { Zap, Award, Target, BookOpen, Clock, Compass } from 'lucide-react'
+import { BookOpen, Clock, Target, ArrowRight } from 'lucide-react'
+import { Card } from '@/components/ui'
 import type { DashboardMetrics } from '@/lib/engine'
 
 interface HeroReadinessGaugeProps {
@@ -21,42 +22,24 @@ export const HeroReadinessGauge: React.FC<HeroReadinessGaugeProps> = ({
 }) => {
   const score = Math.max(0, Math.min(100, Math.round(overallReadiness)))
 
-  // SVG Circular Gauge parameters
-  const size = 180
-  const strokeWidth = 14
+  // SVG Gauge calculations
+  const size = 96
+  const strokeWidth = 7
   const radius = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
   const strokeDashoffset = circumference - (score / 100) * circumference
 
-  // Visual Health Tier
   const tier =
-    score >= 80
-      ? { label: 'Interview Ready', color: 'var(--success)', glow: 'var(--success-subtle)' }
-      : score >= 60
-      ? { label: 'Proficient', color: 'var(--accent)', glow: 'var(--accent-glow)' }
-      : score >= 35
-      ? { label: 'Developing', color: 'var(--warning)', glow: 'var(--warning-subtle)' }
-      : { label: 'Early Stage', color: 'var(--text-secondary)', glow: 'var(--surface-3)' }
+    score >= 80 ? 'Interview Ready' : score >= 60 ? 'Proficient' : score >= 35 ? 'Developing' : 'Early Stage'
+  const tierVariant =
+    score >= 80 ? 'var(--success)' : score >= 60 ? 'var(--accent-light)' : score >= 35 ? 'var(--warning)' : 'var(--text-muted)'
 
   return (
-    <div
-      className="p-6 rounded-[var(--radius-xl)] border border-[var(--border)] relative overflow-hidden"
-      style={{
-        background: 'linear-gradient(135deg, var(--surface-1) 0%, var(--surface-2) 100%)',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.35)',
-      }}
-    >
-      {/* Background ambient glow */}
-      <div
-        className="absolute -right-16 -bottom-16 w-64 h-64 rounded-full pointer-events-none opacity-20 blur-3xl"
-        style={{ background: tier.color }}
-      />
-
-      <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
-        {/* ── Radial SVG Progress Gauge */}
-        <div className="relative flex-shrink-0 flex items-center justify-center">
+    <Card className="flex flex-col md:flex-row items-center gap-8 transition-all p-6">
+      {/* ── Left: Circular Radial Gauge */}
+      <div className="flex-shrink-0 flex flex-col items-center">
+        <div className="relative flex items-center justify-center">
           <svg width={size} height={size} className="transform -rotate-90">
-            {/* Background Track */}
             <circle
               cx={size / 2}
               cy={size / 2}
@@ -65,111 +48,94 @@ export const HeroReadinessGauge: React.FC<HeroReadinessGaugeProps> = ({
               strokeWidth={strokeWidth}
               fill="transparent"
             />
-            {/* Progress Stroke */}
             <circle
               cx={size / 2}
               cy={size / 2}
               r={radius}
-              stroke={tier.color}
+              stroke={tierVariant}
               strokeWidth={strokeWidth}
               fill="transparent"
               strokeDasharray={circumference}
               strokeDashoffset={strokeDashoffset}
               strokeLinecap="round"
-              style={{
-                transition: 'stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1)',
-                filter: `drop-shadow(0 0 8px ${tier.color})`,
-              }}
+              className="transition-all duration-700 ease-out"
             />
           </svg>
-
-          {/* Center Content */}
-          <div className="absolute flex flex-col items-center justify-center text-center">
-            <span className="text-3xl font-extrabold font-mono tracking-tight text-[var(--text-primary)]">
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center select-none">
+            <span className="text-xl font-bold font-mono text-[var(--text-primary)] tracking-tight">
               {score}%
             </span>
-            <span className="text-[11px] font-medium tracking-wider uppercase text-[var(--text-muted)] mt-0.5">
-              Readiness
-            </span>
-          </div>
-        </div>
-
-        {/* ── Text Insights & Action Stats */}
-        <div className="flex-1 text-center md:text-left space-y-4">
-          <div>
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-2">
-              <div
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border"
-                style={{
-                  background: tier.glow,
-                  color: tier.color,
-                  borderColor: `${tier.color}40`,
-                }}
-              >
-                <Award size={14} />
-                <span>Status: {tier.label}</span>
-              </div>
-
-              {primaryRoleTitle && (
-                <button
-                  type="button"
-                  onClick={onNavigateToCareer}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--surface-3)] text-[var(--accent-light)] border border-[var(--border)] hover:border-[var(--accent)]/50 transition-colors cursor-pointer"
-                >
-                  <Compass size={13} />
-                  <span>Target: {primaryRoleTitle}</span>
-                </button>
-              )}
-            </div>
-
-            <h2 className="text-xl font-bold text-[var(--text-primary)]">
-              Overall Learning Readiness
-            </h2>
-            <p className="text-xs text-[var(--text-secondary)] mt-1 max-w-md">
-              Evidence-based aggregate computed across all 8 skill categories, weighting concept comprehension, practice mastery, volume, and time decay.
-            </p>
-          </div>
-
-          {/* Key Metric Badges */}
-          <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-xs">
-            <div className="flex items-center gap-2 text-[var(--text-secondary)]">
-              <BookOpen size={14} className="text-[var(--accent-light)]" />
-              <span>
-                <strong className="text-[var(--text-primary)] font-mono">{metrics.activeSubtopicsCount}</strong> Active Subtopics
-              </span>
-            </div>
-            <div className="flex items-center gap-2 text-[var(--text-secondary)]">
-              <Target size={14} className="text-[var(--success)]" />
-              <span>
-                <strong className="text-[var(--text-primary)] font-mono">{metrics.totalProblems}</strong> Problems Solved
-              </span>
-            </div>
-            <div className="flex items-center gap-2 text-[var(--text-secondary)]">
-              <Clock size={14} className="text-[var(--info)]" />
-              <span>
-                <strong className="text-[var(--text-primary)] font-mono">{metrics.totalStudyHours}</strong> Study Hours
-              </span>
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="flex items-center justify-center md:justify-start gap-3 pt-1">
-            <button
-              onClick={onOpenQuickLog}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-[var(--radius-md)] text-xs font-semibold bg-[var(--accent)] text-white shadow-[0_0_15px_var(--accent-glow)] hover:bg-[var(--accent-light)] transition-all cursor-pointer"
-            >
-              <Zap size={14} />
-              <span>Quick Log Practice</span>
-            </button>
-            <button
-              onClick={onNavigateToSkills}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-[var(--radius-md)] text-xs font-medium bg-[var(--surface-3)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] border border-[var(--border)] transition-all cursor-pointer"
-            >
-              <span>Explore Skill Tree &rarr;</span>
-            </button>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* ── Middle: Overall Readiness & Clean Minimal Metrics */}
+      <div className="flex-1 min-w-0 text-center md:text-left space-y-4">
+        <div className="space-y-1.5">
+          <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5">
+            <h2 className="text-base font-semibold text-[var(--text-primary)] tracking-tight">
+              Learning Readiness
+            </h2>
+            <span
+              className="text-[11px] font-medium px-2 py-0.5 rounded-[var(--radius-sm)] border"
+              style={{
+                background: 'var(--surface-2)',
+                borderColor: 'var(--border)',
+                color: tierVariant,
+              }}
+            >
+              {tier}
+            </span>
+
+            {primaryRoleTitle && (
+              <button
+                onClick={onNavigateToCareer}
+                className="text-xs text-[var(--text-secondary)] hover:text-[var(--accent-light)] flex items-center gap-1 cursor-pointer font-medium transition-colors"
+              >
+                <span>{primaryRoleTitle}</span>
+                <ArrowRight size={11} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* ── KPI Row */}
+        <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 text-xs pt-1 border-t border-[var(--border)]">
+          <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
+            <BookOpen size={13} className="text-[var(--text-muted)]" />
+            <span className="font-semibold text-[var(--text-primary)]">{metrics.activeSubtopicsCount}</span>
+            <span className="text-[var(--text-muted)]">Active Topics</span>
+          </div>
+
+          <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
+            <Target size={13} className="text-[var(--text-muted)]" />
+            <span className="font-semibold text-[var(--text-primary)]">{metrics.totalProblems}</span>
+            <span className="text-[var(--text-muted)]">Solved</span>
+          </div>
+
+          <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
+            <Clock size={13} className="text-[var(--text-muted)]" />
+            <span className="font-semibold text-[var(--text-primary)]">{metrics.totalStudyHours}h</span>
+            <span className="text-[var(--text-muted)]">Study Time</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Right: Quiet Action Buttons */}
+      <div className="flex flex-col sm:flex-row md:flex-col gap-2.5 flex-shrink-0 w-full md:w-auto">
+        <button
+          onClick={onOpenQuickLog}
+          className="px-4 py-2 text-xs font-semibold rounded-[var(--radius-sm)] bg-[var(--accent)] text-white hover:opacity-90 transition-all cursor-pointer text-center"
+        >
+          Quick Log
+        </button>
+        <button
+          onClick={onNavigateToSkills}
+          className="px-4 py-2 text-xs font-medium rounded-[var(--radius-sm)] bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--border-strong)] transition-all cursor-pointer text-center"
+        >
+          Curriculum
+        </button>
+      </div>
+    </Card>
   )
 }

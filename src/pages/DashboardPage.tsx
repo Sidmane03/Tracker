@@ -37,8 +37,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
   return (
     <PageWrapper
-      title="Executive Dashboard"
-      subtitle="Real-time learning readiness, category progress, and skill gap intelligence"
+      title="Dashboard"
       actions={
         <Button
           variant="primary"
@@ -50,47 +49,57 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         </Button>
       }
     >
-      <div className="space-y-6 max-w-6xl">
+      <div className="space-y-10 max-w-6xl pb-8">
         {/* ── Top Hero: Radial Readiness Gauge & Core Metrics */}
-        <HeroReadinessGauge
-          overallReadiness={overallReadiness}
-          metrics={metrics}
-          primaryRoleTitle={primaryRole?.title}
-          onNavigateToSkills={() => onNavigate?.('skills')}
-          onNavigateToCareer={() => onNavigate?.('career')}
-          onOpenQuickLog={() => onOpenQuickLog?.()}
-        />
+        <section>
+          <HeroReadinessGauge
+            overallReadiness={overallReadiness}
+            metrics={metrics}
+            primaryRoleTitle={primaryRole?.title}
+            onNavigateToSkills={() => onNavigate?.('skills')}
+            onNavigateToCareer={() => onNavigate?.('career')}
+            onOpenQuickLog={() => onOpenQuickLog?.()}
+          />
+        </section>
 
         {/* ── Today's Recommended Focus */}
-        <TodaysFocusWidget
-          onOpenQuickLog={(sid) => onOpenQuickLog?.(sid)}
-          onInspectSubtopic={(sid) => onInspectSubtopic?.(sid)}
-        />
+        <section>
+          <TodaysFocusWidget
+            onOpenQuickLog={(sid) => onOpenQuickLog?.(sid)}
+            onInspectSubtopic={(sid) => onInspectSubtopic?.(sid)}
+          />
+        </section>
 
         {/* ── Category Progress Bars */}
-        <CategoryProgressGrid
-          onNavigateToSkills={() => onNavigate?.('skills')}
-        />
+        <section>
+          <CategoryProgressGrid
+            onNavigateToSkills={() => onNavigate?.('skills')}
+          />
+        </section>
 
         {/* ── 2-Column Analytics: Strengths / Weaknesses & Skill Gaps vs Activity Feed */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left 2 Cols: Strengths, Weaknesses, and Skill Gaps */}
-          <div className="lg:col-span-2 space-y-6">
-            <StrengthWeaknessPanel
-              onOpenQuickLog={(sid) => onOpenQuickLog?.(sid)}
-            />
-            <SkillGapsRadar
-              onOpenQuickLog={(sid) => onOpenQuickLog?.(sid)}
-            />
-          </div>
+        <section>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left 2 Cols: Strengths, Weaknesses, and Skill Gaps */}
+            <div className="lg:col-span-2 space-y-6">
+              <StrengthWeaknessPanel
+                onOpenQuickLog={(sid) => onOpenQuickLog?.(sid)}
+                onInspectSubtopic={(sid) => onInspectSubtopic?.(sid)}
+              />
+              <SkillGapsRadar
+                onOpenQuickLog={(sid) => onOpenQuickLog?.(sid)}
+                onInspectSubtopic={(sid) => onInspectSubtopic?.(sid)}
+              />
+            </div>
 
-          {/* Right 1 Col: Recent Practice Activity */}
-          <div className="lg:col-span-1">
-            <RecentActivityFeed
-              onNavigateToLogs={() => onNavigate?.('log')}
-            />
+            {/* Right 1 Col: Recent Practice Activity */}
+            <div className="lg:col-span-1">
+              <RecentActivityFeed
+                onNavigateToLogs={() => onNavigate?.('log')}
+              />
+            </div>
           </div>
-        </div>
+        </section>
       </div>
     </PageWrapper>
   )

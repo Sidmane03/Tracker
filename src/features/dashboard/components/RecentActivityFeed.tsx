@@ -1,7 +1,7 @@
 import React from 'react'
 import { useStore } from '@/store'
-import { History, ChevronRight, BookOpen } from 'lucide-react'
-import { Badge } from '@/components/ui/Badge'
+import { ChevronRight } from 'lucide-react'
+import { Badge, Card } from '@/components/ui'
 import { formatDistanceToNow } from 'date-fns'
 
 interface RecentActivityFeedProps {
@@ -16,39 +16,28 @@ export const RecentActivityFeed: React.FC<RecentActivityFeedProps> = ({
   const recent = practiceLogs.slice(0, 5)
 
   return (
-    <div
-      className="p-4 rounded-[var(--radius-lg)] border border-[var(--border)] flex flex-col justify-between"
-      style={{ background: 'var(--surface-1)' }}
-    >
+    <Card className="flex flex-col justify-between h-full">
       <div>
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-md bg-[var(--accent-subtle)] text-[var(--accent-light)]">
-              <History size={16} />
-            </div>
-            <div>
-              <h3 className="text-xs font-semibold text-[var(--text-primary)]">
-                Recent Practice Activity
-              </h3>
-              <p className="text-[10px] text-[var(--text-muted)]">
-                Latest logged study sessions
-              </p>
-            </div>
+            <span className="w-2 h-2 rounded-full bg-[var(--accent-light)] opacity-80" />
+            <h3 className="text-xs font-semibold text-[var(--text-primary)]">
+              Recent Activity
+            </h3>
           </div>
 
           <button
             onClick={onNavigateToLogs}
-            className="text-xs text-[var(--accent-light)] hover:underline flex items-center gap-0.5 cursor-pointer"
+            className="text-xs text-[var(--text-secondary)] hover:text-[var(--accent-light)] flex items-center gap-0.5 cursor-pointer font-medium transition-colors"
           >
-            <span>View all ({practiceLogs.length})</span>
+            <span>All ({practiceLogs.length})</span>
             <ChevronRight size={12} />
           </button>
         </div>
 
         {recent.length === 0 ? (
-          <div className="py-8 text-center text-xs text-[var(--text-muted)]">
-            <BookOpen size={24} className="mx-auto mb-2 opacity-40" />
-            <p>No practice logged yet.</p>
+          <div className="py-12 text-center text-xs text-[var(--text-muted)]">
+            No data.
           </div>
         ) : (
           <div className="space-y-2">
@@ -73,7 +62,7 @@ export const RecentActivityFeed: React.FC<RecentActivityFeedProps> = ({
               return (
                 <div
                   key={log.id}
-                  className="p-2.5 rounded-[var(--radius-md)] bg-[var(--surface-2)] border border-[var(--border)] flex items-center justify-between gap-3 text-xs"
+                  className="p-3 rounded-[var(--radius-md)] bg-[var(--surface-2)] border border-[var(--border)] flex items-center justify-between gap-3 text-xs"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="font-medium text-[var(--text-primary)] truncate">
@@ -82,14 +71,14 @@ export const RecentActivityFeed: React.FC<RecentActivityFeedProps> = ({
                     <div className="flex items-center gap-1.5 text-[10px] text-[var(--text-muted)] mt-0.5">
                       <span>{cat?.title || log.categoryId}</span>
                       <span>&bull;</span>
-                      <span>{formatDistanceToNow(log.timestamp, { addSuffix: true })}</span>
+                      <span>{formatDistanceToNow(new Date(log.timestamp), { addSuffix: true })}</span>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-1.5 flex-shrink-0">
                     <Badge variant={diffVariant}>{log.difficulty}</Badge>
                     <Badge variant={outVariant}>{log.outcome}</Badge>
-                    <span className="font-mono text-[var(--text-secondary)] font-medium pl-1">
+                    <span className="font-mono text-[var(--text-secondary)] font-medium pl-1 text-[11px]">
                       {log.timeSpentMinutes}m
                     </span>
                   </div>
@@ -99,6 +88,6 @@ export const RecentActivityFeed: React.FC<RecentActivityFeedProps> = ({
           </div>
         )}
       </div>
-    </div>
+    </Card>
   )
 }
