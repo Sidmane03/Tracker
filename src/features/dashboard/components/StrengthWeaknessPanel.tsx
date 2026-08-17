@@ -3,26 +3,31 @@ import { Card } from '@/components/ui'
 import { getTopStrengths, getTopWeaknesses } from '@/lib/engine'
 import { useStore } from '@/store'
 import type { ScoreBreakdown } from '@/lib/engine'
+import type { Subtopic } from '@/types/domain'
 
 interface StrengthWeaknessPanelProps {
+  subtopicList: Subtopic[]
+  scores: Record<string, ScoreBreakdown>
   onOpenQuickLog?: (subtopicId: string) => void
   onInspectSubtopic?: (subtopicId: string) => void
 }
 
 export const StrengthWeaknessPanel: React.FC<StrengthWeaknessPanelProps> = ({
+  subtopicList,
+  scores,
   onInspectSubtopic,
 }) => {
-  const { subtopics, categories, topics, getSubtopicReadiness } = useStore()
-
-  const subtopicList = Object.values(subtopics)
-
-  const scores: Record<string, ScoreBreakdown> = {}
-  for (const s of subtopicList) {
-    scores[s.id] = getSubtopicReadiness(s.id)
-  }
+  const { categories, topics } = useStore()
 
   const strengths = getTopStrengths(subtopicList, scores, categories, topics, 3)
   const weaknesses = getTopWeaknesses(subtopicList, scores, categories, topics, 3)
+
+  const handleKeyDown = (e: React.KeyboardEvent, subtopicId: string) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      onInspectSubtopic?.(subtopicId)
+    }
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -45,7 +50,10 @@ export const StrengthWeaknessPanel: React.FC<StrengthWeaknessPanelProps> = ({
               strengths.map(({ subtopic, readiness }) => (
                 <div
                   key={subtopic.id}
+                  role="button"
+                  tabIndex={0}
                   onClick={() => onInspectSubtopic?.(subtopic.id)}
+                  onKeyDown={(e) => handleKeyDown(e, subtopic.id)}
                   className="flex items-center justify-between p-3 rounded-[var(--radius-md)] bg-[var(--surface-2)] border border-[var(--border)] hover:border-[var(--border-strong)] transition-all cursor-pointer group"
                 >
                   <div className="min-w-0 flex-1 pr-3">
@@ -85,7 +93,10 @@ export const StrengthWeaknessPanel: React.FC<StrengthWeaknessPanelProps> = ({
               weaknesses.map(({ subtopic, readiness }) => (
                 <div
                   key={subtopic.id}
+                  role="button"
+                  tabIndex={0}
                   onClick={() => onInspectSubtopic?.(subtopic.id)}
+                  onKeyDown={(e) => handleKeyDown(e, subtopic.id)}
                   className="flex items-center justify-between p-3 rounded-[var(--radius-md)] bg-[var(--surface-2)] border border-[var(--border)] hover:border-[var(--border-strong)] transition-all cursor-pointer group"
                 >
                   <div className="min-w-0 flex-1 pr-3">

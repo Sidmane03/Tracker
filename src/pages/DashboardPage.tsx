@@ -1,6 +1,6 @@
 import React from 'react'
 import { PageWrapper } from '@/components/layout/PageWrapper'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui'
 import { HeroReadinessGauge } from '@/features/dashboard/components/HeroReadinessGauge'
 import { TodaysFocusWidget } from '@/features/dashboard/components/TodaysFocusWidget'
 import { CategoryProgressGrid } from '@/features/dashboard/components/CategoryProgressGrid'
@@ -9,8 +9,8 @@ import { SkillGapsRadar } from '@/features/dashboard/components/SkillGapsRadar'
 import { RecentActivityFeed } from '@/features/dashboard/components/RecentActivityFeed'
 import { useStore } from '@/store'
 import { getDashboardSummaryMetrics } from '@/lib/engine'
+import { useDashboardScores } from '@/hooks/useDashboardScores'
 import { Plus } from 'lucide-react'
-import type { ScoreBreakdown } from '@/lib/engine'
 
 interface DashboardPageProps {
   onNavigate?: (page: string, filter?: string) => void
@@ -26,11 +26,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   const store = useStore()
   const overallReadiness = store.getOverallReadiness()
 
-  const subtopicList = Object.values(store.subtopics)
-  const scores: Record<string, ScoreBreakdown> = {}
-  for (const s of subtopicList) {
-    scores[s.id] = store.getSubtopicReadiness(s.id)
-  }
+  // Centralized score computation — passed down to child widgets
+  const { subtopicList, scores } = useDashboardScores()
 
   const metrics = getDashboardSummaryMetrics(store, scores)
   const primaryRole = store.careerRoles.find((r) => r.id === store.preferences.primaryCareerTarget)
@@ -65,6 +62,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         {/* ── Today's Recommended Focus */}
         <section>
           <TodaysFocusWidget
+            subtopicList={subtopicList}
+            scores={scores}
             onOpenQuickLog={(sid) => onOpenQuickLog?.(sid)}
             onInspectSubtopic={(sid) => onInspectSubtopic?.(sid)}
           />
@@ -83,10 +82,14 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             {/* Left 2 Cols: Strengths, Weaknesses, and Skill Gaps */}
             <div className="lg:col-span-2 space-y-6">
               <StrengthWeaknessPanel
+                subtopicList={subtopicList}
+                scores={scores}
                 onOpenQuickLog={(sid) => onOpenQuickLog?.(sid)}
                 onInspectSubtopic={(sid) => onInspectSubtopic?.(sid)}
               />
               <SkillGapsRadar
+                subtopicList={subtopicList}
+                scores={scores}
                 onOpenQuickLog={(sid) => onOpenQuickLog?.(sid)}
                 onInspectSubtopic={(sid) => onInspectSubtopic?.(sid)}
               />

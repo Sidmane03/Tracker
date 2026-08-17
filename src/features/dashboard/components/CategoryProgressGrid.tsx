@@ -56,7 +56,15 @@ export const CategoryProgressGrid: React.FC<CategoryProgressGridProps> = ({
           return (
             <div
               key={cid}
+              role="button"
+              tabIndex={0}
               onClick={() => onNavigateToSkills?.(cid)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  onNavigateToSkills?.(cid)
+                }
+              }}
               className="p-5 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface-1)] hover:border-[var(--border-strong)] hover:bg-[var(--surface-2)] transition-all cursor-pointer group flex flex-col justify-between"
             >
               <div>

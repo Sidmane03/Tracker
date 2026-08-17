@@ -4,22 +4,21 @@ import { Card } from '@/components/ui'
 import { getRecommendedTopics } from '@/lib/engine'
 import { useStore } from '@/store'
 import type { ScoreBreakdown } from '@/lib/engine'
+import type { Subtopic } from '@/types/domain'
 
 interface TodaysFocusWidgetProps {
+  subtopicList: Subtopic[]
+  scores: Record<string, ScoreBreakdown>
   onOpenQuickLog?: (subtopicId: string) => void
   onInspectSubtopic?: (subtopicId: string) => void
 }
 
 export const TodaysFocusWidget: React.FC<TodaysFocusWidgetProps> = ({
+  subtopicList,
+  scores,
   onInspectSubtopic,
 }) => {
-  const { subtopics, categories, topics, careerRoles, preferences, getSubtopicReadiness } = useStore()
-
-  const subtopicList = Object.values(subtopics)
-  const scores: Record<string, ScoreBreakdown> = {}
-  for (const s of subtopicList) {
-    scores[s.id] = getSubtopicReadiness(s.id)
-  }
+  const { categories, topics, careerRoles, preferences } = useStore()
 
   const primaryRole = careerRoles.find((r) => r.id === preferences.primaryCareerTarget)
   const recommendations = getRecommendedTopics(subtopicList, scores, categories, topics, primaryRole, 3)
@@ -55,7 +54,15 @@ export const TodaysFocusWidget: React.FC<TodaysFocusWidgetProps> = ({
           return (
             <div
               key={subtopic.id}
+              role="button"
+              tabIndex={0}
               onClick={() => onInspectSubtopic?.(subtopic.id)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  onInspectSubtopic?.(subtopic.id)
+                }
+              }}
               className="p-5 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface-1)] hover:border-[var(--border-strong)] hover:bg-[var(--surface-2)] transition-all cursor-pointer flex flex-col justify-between group"
             >
               <div>

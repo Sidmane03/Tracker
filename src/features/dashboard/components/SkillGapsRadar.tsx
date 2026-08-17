@@ -3,23 +3,21 @@ import { Card } from '@/components/ui'
 import { getCriticalSkillGaps } from '@/lib/engine'
 import { useStore } from '@/store'
 import type { ScoreBreakdown } from '@/lib/engine'
+import type { Subtopic } from '@/types/domain'
 
 interface SkillGapsRadarProps {
+  subtopicList: Subtopic[]
+  scores: Record<string, ScoreBreakdown>
   onOpenQuickLog?: (subtopicId: string) => void
   onInspectSubtopic?: (subtopicId: string) => void
 }
 
 export const SkillGapsRadar: React.FC<SkillGapsRadarProps> = ({
+  subtopicList,
+  scores,
   onInspectSubtopic,
 }) => {
-  const { subtopics, categories, topics, getSubtopicReadiness } = useStore()
-
-  const subtopicList = Object.values(subtopics)
-
-  const scores: Record<string, ScoreBreakdown> = {}
-  for (const s of subtopicList) {
-    scores[s.id] = getSubtopicReadiness(s.id)
-  }
+  const { categories, topics } = useStore()
 
   const gaps = getCriticalSkillGaps(subtopicList, scores, categories, topics, 4)
 
@@ -38,7 +36,15 @@ export const SkillGapsRadar: React.FC<SkillGapsRadarProps> = ({
         {gaps.map(({ subtopic, readiness }) => (
           <div
             key={subtopic.id}
+            role="button"
+            tabIndex={0}
             onClick={() => onInspectSubtopic?.(subtopic.id)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                onInspectSubtopic?.(subtopic.id)
+              }
+            }}
             className="p-4 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface-2)] hover:border-[var(--border-strong)] transition-all cursor-pointer flex items-center justify-between group"
           >
             <div className="min-w-0 flex-1 pr-3">

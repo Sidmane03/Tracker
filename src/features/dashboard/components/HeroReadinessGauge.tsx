@@ -38,7 +38,14 @@ export const HeroReadinessGauge: React.FC<HeroReadinessGaugeProps> = ({
     <Card className="flex flex-col md:flex-row items-center gap-8 transition-all p-6">
       {/* ── Left: Circular Radial Gauge */}
       <div className="flex-shrink-0 flex flex-col items-center">
-        <div className="relative flex items-center justify-center">
+        <div
+          className="relative flex items-center justify-center"
+          role="progressbar"
+          aria-valuenow={score}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={`Overall learning readiness: ${score}%`}
+        >
           <svg width={size} height={size} className="transform -rotate-90">
             <circle
               cx={size / 2}
