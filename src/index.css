@@ -1,53 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
-/* ─── Design Tokens ──────────────────────────────────────── */
+/* ─── Design Tokens (Figma Dashboard Theme) ─────────────────── */
 :root {
   /* Surfaces */
-  --surface-0: #0c0c10;
-  --surface-1: #14141c;
-  --surface-2: #1e1e2a;
-  --surface-3: #262635;
+  --surface-0: #0a1020;
+  --surface-1: #10192b;
+  --surface-2: #17223a;
+  --surface-3: #202c44;
 
   /* Borders */
-  --border: rgba(255, 255, 255, 0.07);
+  --border: rgba(255, 255, 255, 0.08);
   --border-strong: rgba(255, 255, 255, 0.14);
 
-  /* Brand - Refined muted earthy indigo/slate */
-  --accent: #6366f1;
-  --accent-light: #818cf8;
-  --accent-glow: rgba(99, 102, 241, 0.15);
-  --accent-subtle: rgba(99, 102, 241, 0.08);
+  /* Brand / Primary */
+  --accent: #7c83ff;
+  --accent-light: #8d93ff;
+  --accent-glow: rgba(124, 131, 255, 0.25);
+  --accent-subtle: rgba(124, 131, 255, 0.12);
 
   /* Text */
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-primary: #f2f5ff;
+  --text-secondary: #9da9c1;
+  --text-muted: #8290aa;
 
-  /* Semantic - Softened, muted tones */
+  /* Semantic Tones */
   --success: #34d399;
-  --success-subtle: rgba(52, 211, 153, 0.08);
+  --success-subtle: rgba(52, 211, 153, 0.1);
   --warning: #fbbf24;
-  --warning-subtle: rgba(251, 191, 36, 0.08);
+  --warning-subtle: rgba(251, 191, 36, 0.1);
   --danger: #f87171;
-  --danger-subtle: rgba(248, 113, 113, 0.08);
+  --danger-subtle: rgba(248, 113, 113, 0.1);
   --info: #38bdf8;
-  --info-subtle: rgba(56, 189, 248, 0.08);
+  --info-subtle: rgba(56, 189, 248, 0.1);
 
-/* Radii - Tightened for Antigravity IDE aesthetic */
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 10px;
-  --radius-xl: 12px; /* Reduced from 20px for sharper container corners */  
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
 
-  /* Category palette */
-  --cat-blue:   #60a5fa;
-  --cat-purple: #a78bfa;
-  --cat-green:  #4ade80;
-  --cat-orange: #fb923c;
-  --cat-cyan:   #22d3ee;
-  --cat-pink:   #f472b6;
+  /* Category palette (Figma-calibrated) */
+  --cat-blue:   #69A9FF;
+  --cat-purple: #9C8CFF;
+  --cat-green:  #55D3DF;
+  --cat-orange: #F6A561;
+  --cat-cyan:   #69C990;
+  --cat-pink:   #EC8EBB;
   --cat-indigo: #818cf8;
-  --cat-amber:  #fbbf24;
+  --cat-amber:  #E7C45F;
 }
 
 /* ─── Reset & Base ───────────────────────────────────────── */
@@ -61,15 +62,19 @@ html, body, #root {
 body {
   background: var(--surface-0);
   color: var(--text-primary);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
   font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ─── Typography ─────────────────────────────────────────── */
+/* ─── Typography & Utilities ─────────────────────────────── */
 h1, h2, h3, h4 { line-height: 1.25; font-weight: 600; }
+
+.mono {
+  font-family: 'JetBrains Mono', monospace;
+}
 
 /* ─── Transitions ────────────────────────────────────────── */
 button, a, input, select, textarea {
@@ -83,13 +88,13 @@ button:focus-visible, a:focus-visible {
 }
 
 /* ─── Custom Scrollbar ───────────────────────────────────── */
-::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
+  background: rgba(148, 160, 184, 0.2);
   border-radius: 999px;
 }
-::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+::-webkit-scrollbar-thumb:hover { background: rgba(148, 160, 184, 0.4); }
 
 /* ─── Animations ─────────────────────────────────────────── */
 @keyframes fadeIn {
@@ -105,7 +110,7 @@ button:focus-visible, a:focus-visible {
 }
 @keyframes pulse-glow {
   0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
-  50%       { box-shadow: 0 0 12px 4px var(--accent-glow); }
+  50%       { box-shadow: 0 0 16px 4px var(--accent-glow); }
 }
 
 .animate-fade-in  { animation: fadeIn 0.2s ease forwards; }

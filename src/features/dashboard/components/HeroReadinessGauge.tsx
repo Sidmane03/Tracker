@@ -1,13 +1,14 @@
 import React from 'react'
 import { BookOpen, Clock, Target, ArrowRight } from 'lucide-react'
-import { Card } from '@/components/ui'
+import { Card, ProgressBar } from '@/components/ui'
+import { useStore } from '@/store'
 import type { DashboardMetrics } from '@/lib/engine'
 
 interface HeroReadinessGaugeProps {
   overallReadiness: number
   metrics: DashboardMetrics
   primaryRoleTitle?: string
-  onNavigateToSkills?: () => void
+  onNavigateToSkills?: (categoryId?: string) => void
   onNavigateToCareer?: () => void
   onOpenQuickLog?: () => void
 }
@@ -20,128 +21,152 @@ export const HeroReadinessGauge: React.FC<HeroReadinessGaugeProps> = ({
   onNavigateToCareer,
   onOpenQuickLog,
 }) => {
+  const { categories, categoryOrder, getCategoryReadiness } = useStore()
   const score = Math.max(0, Math.min(100, Math.round(overallReadiness)))
-
-  // SVG Gauge calculations
-  const size = 96
-  const strokeWidth = 7
-  const radius = (size - strokeWidth) / 2
-  const circumference = 2 * Math.PI * radius
-  const strokeDashoffset = circumference - (score / 100) * circumference
 
   const tier =
     score >= 80 ? 'Interview Ready' : score >= 60 ? 'Proficient' : score >= 35 ? 'Developing' : 'Early Stage'
-  const tierVariant =
+  const tierColor =
     score >= 80 ? 'var(--success)' : score >= 60 ? 'var(--accent-light)' : score >= 35 ? 'var(--warning)' : 'var(--text-muted)'
 
   return (
-    <Card className="flex flex-col md:flex-row items-center gap-8 transition-all p-6">
-      {/* ── Left: Circular Radial Gauge */}
-      <div className="flex-shrink-0 flex flex-col items-center">
-        <div
-          className="relative flex items-center justify-center"
-          role="progressbar"
-          aria-valuenow={score}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-label={`Overall learning readiness: ${score}%`}
-        >
-          <svg width={size} height={size} className="transform -rotate-90">
-            <circle
-              cx={size / 2}
-              cy={size / 2}
-              r={radius}
-              stroke="var(--surface-3)"
-              strokeWidth={strokeWidth}
-              fill="transparent"
-            />
-            <circle
-              cx={size / 2}
-              cy={size / 2}
-              r={radius}
-              stroke={tierVariant}
-              strokeWidth={strokeWidth}
-              fill="transparent"
-              strokeDasharray={circumference}
-              strokeDashoffset={strokeDashoffset}
-              strokeLinecap="round"
-              className="transition-all duration-700 ease-out"
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center select-none">
-            <span className="text-xl font-bold font-mono text-[var(--text-primary)] tracking-tight">
-              {score}%
-            </span>
-          </div>
+    <Card className="rounded-[20px] border border-white/[0.08] bg-[var(--surface-1)] p-5 sm:p-6 space-y-6">
+      {/* ── Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-bold tracking-[0.14em] text-[var(--text-muted)] uppercase">
+            Your learning
+          </p>
+          <h2 className="mt-1 text-xl sm:text-2xl font-semibold tracking-[-0.04em] text-[var(--text-primary)]">
+            Skill progress
+          </h2>
         </div>
-      </div>
 
-      {/* ── Middle: Overall Readiness & Clean Minimal Metrics */}
-      <div className="flex-1 min-w-0 text-center md:text-left space-y-4">
-        <div className="space-y-1.5">
-          <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5">
-            <h2 className="text-base font-semibold text-[var(--text-primary)] tracking-tight">
-              Learning Readiness
-            </h2>
-            <span
-              className="text-[11px] font-medium px-2 py-0.5 rounded-[var(--radius-sm)] border"
-              style={{
-                background: 'var(--surface-2)',
-                borderColor: 'var(--border)',
-                color: tierVariant,
-              }}
+        <div className="flex items-center gap-3">
+          <div
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/[0.08] bg-[var(--surface-2)] text-xs font-semibold"
+            style={{ color: tierColor }}
+          >
+            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: tierColor }} />
+            <span>{score}% Overall</span>
+            <span className="text-[var(--text-muted)] font-normal">&bull;</span>
+            <span className="font-medium text-[var(--text-secondary)]">{tier}</span>
+          </div>
+
+          {primaryRoleTitle && (
+            <button
+              onClick={onNavigateToCareer}
+              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/[0.08] bg-[var(--surface-2)] text-xs text-[var(--text-secondary)] hover:text-[var(--accent-light)] hover:border-white/[0.16] transition cursor-pointer font-medium"
             >
-              {tier}
-            </span>
+              <span>Target: {primaryRoleTitle}</span>
+              <ArrowRight size={12} />
+            </button>
+          )}
+        </div>
+      </div>
 
-            {primaryRoleTitle && (
-              <button
-                onClick={onNavigateToCareer}
-                className="text-xs text-[var(--text-secondary)] hover:text-[var(--accent-light)] flex items-center gap-1 cursor-pointer font-medium transition-colors"
-              >
-                <span>{primaryRoleTitle}</span>
-                <ArrowRight size={11} />
-              </button>
-            )}
+      {/* ── Core KPI Stats */}
+      <div className="grid grid-cols-3 gap-3 p-3.5 rounded-xl bg-[var(--surface-2)] border border-white/[0.05] text-xs">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-[#202c44] flex items-center justify-center flex-shrink-0 text-[var(--accent-light)]">
+            <BookOpen size={15} />
+          </div>
+          <div>
+            <div className="mono font-bold text-sm text-[var(--text-primary)]">
+              {metrics.activeSubtopicsCount}
+            </div>
+            <div className="text-[11px] text-[var(--text-muted)]">Active Topics</div>
           </div>
         </div>
 
-        {/* ── KPI Row */}
-        <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 text-xs pt-1 border-t border-[var(--border)]">
-          <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
-            <BookOpen size={13} className="text-[var(--text-muted)]" />
-            <span className="font-semibold text-[var(--text-primary)]">{metrics.activeSubtopicsCount}</span>
-            <span className="text-[var(--text-muted)]">Active Topics</span>
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-[#202c44] flex items-center justify-center flex-shrink-0 text-[var(--success)]">
+            <Target size={15} />
           </div>
-
-          <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
-            <Target size={13} className="text-[var(--text-muted)]" />
-            <span className="font-semibold text-[var(--text-primary)]">{metrics.totalProblems}</span>
-            <span className="text-[var(--text-muted)]">Solved</span>
+          <div>
+            <div className="mono font-bold text-sm text-[var(--text-primary)]">
+              {metrics.totalProblems}
+            </div>
+            <div className="text-[11px] text-[var(--text-muted)]">Solved Cleanly</div>
           </div>
+        </div>
 
-          <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
-            <Clock size={13} className="text-[var(--text-muted)]" />
-            <span className="font-semibold text-[var(--text-primary)]">{metrics.totalStudyHours}h</span>
-            <span className="text-[var(--text-muted)]">Study Time</span>
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-[#202c44] flex items-center justify-center flex-shrink-0 text-[var(--warning)]">
+            <Clock size={15} />
+          </div>
+          <div>
+            <div className="mono font-bold text-sm text-[var(--text-primary)]">
+              {metrics.totalStudyHours}h
+            </div>
+            <div className="text-[11px] text-[var(--text-muted)]">Study Time</div>
           </div>
         </div>
       </div>
 
-      {/* ── Right: Quiet Action Buttons */}
-      <div className="flex flex-col sm:flex-row md:flex-col gap-2.5 flex-shrink-0 w-full md:w-auto">
-        <button
-          onClick={onOpenQuickLog}
-          className="px-4 py-2 text-xs font-semibold rounded-[var(--radius-sm)] bg-[var(--accent)] text-white hover:opacity-90 transition-all cursor-pointer text-center"
-        >
-          Quick Log
-        </button>
-        <button
-          onClick={onNavigateToSkills}
-          className="px-4 py-2 text-xs font-medium rounded-[var(--radius-sm)] bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--border-strong)] transition-all cursor-pointer text-center"
-        >
-          Curriculum
-        </button>
+      {/* ── Multi-Category Skill Bars Grid (Matching Figma Skill progress) */}
+      <div className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
+        {categoryOrder.map((cid) => {
+          const cat = categories[cid]
+          if (!cat) return null
+          const catScore = getCategoryReadiness(cid)
+          const color = `var(--${cat.color})`
+
+          return (
+            <div
+              key={cid}
+              role="button"
+              tabIndex={0}
+              onClick={() => onNavigateToSkills?.(cid)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  onNavigateToSkills?.(cid)
+                }
+              }}
+              className="group cursor-pointer"
+            >
+              <div className="mb-1.5 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span
+                    className="w-2 h-2 rounded-full flex-shrink-0"
+                    style={{ background: color }}
+                  />
+                  <span className="text-xs font-semibold text-[#dce3f5] group-hover:text-[var(--accent-light)] transition-colors truncate">
+                    {cat.title}
+                  </span>
+                </div>
+                <span className="mono text-xs font-semibold text-[#b9c4dd]">
+                  {catScore}%
+                </span>
+              </div>
+              <ProgressBar value={catScore} color={color} />
+            </div>
+          )
+        })}
+      </div>
+
+      {/* ── Action buttons */}
+      <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between text-xs">
+        <span className="text-[11px] text-[var(--text-muted)]">
+          {score >= 60 ? 'Great consistency — keep going!' : 'Ready to practice today.'}
+        </span>
+        <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            onClick={() => onNavigateToSkills?.()}
+            className="text-[var(--text-secondary)] hover:text-white font-medium transition cursor-pointer px-2 py-1"
+          >
+            Curriculum →
+          </button>
+          <button
+            type="button"
+            onClick={onOpenQuickLog}
+            className="rounded-lg bg-[var(--accent)] px-3.5 py-1.5 text-xs font-bold text-white shadow-[0_6px_16px_var(--accent-glow)] transition hover:bg-[var(--accent-light)] cursor-pointer"
+          >
+            + Quick log
+          </button>
+        </div>
       </div>
     </Card>
   )

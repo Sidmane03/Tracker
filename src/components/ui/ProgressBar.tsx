@@ -2,7 +2,9 @@ import React from 'react'
 
 interface ProgressBarProps {
   value: number          // 0-100
+  color?: string         // Custom hex or var()
   height?: number        // px
+  tall?: boolean         // Preset taller bar (8px)
   showLabel?: boolean
   animate?: boolean
   className?: string
@@ -17,28 +19,31 @@ function resolveColor(value: number): string {
 
 export const ProgressBar: React.FC<ProgressBarProps> = ({
   value,
-  height = 6,
+  color,
+  height,
+  tall = false,
   showLabel = false,
   animate = true,
   className = '',
 }) => {
   const clamped = Math.max(0, Math.min(100, Math.round(value)))
-  const color = resolveColor(clamped)
+  const barColor = color || resolveColor(clamped)
+  const barHeight = height ?? (tall ? 8 : 6)
 
   return (
     <div className={`w-full ${className}`}>
       <div
         className="w-full rounded-full overflow-hidden"
-        style={{ height, background: 'var(--surface-3)' }}
+        style={{ height: barHeight, background: 'var(--surface-3)' }}
       >
         <div
-          className={animate ? 'h-full rounded-full transition-all duration-700 ease-out' : 'h-full rounded-full'}
-          style={{ width: `${clamped}%`, background: color }}
+          className={animate ? 'h-full rounded-full transition-all duration-500 ease-out' : 'h-full rounded-full'}
+          style={{ width: `${clamped}%`, background: barColor }}
         />
       </div>
       {showLabel && (
         <div className="flex justify-end mt-1">
-          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+          <span className="mono text-xs text-[var(--text-muted)]">
             {clamped}%
           </span>
         </div>
