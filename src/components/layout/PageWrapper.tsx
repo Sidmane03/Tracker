@@ -15,24 +15,13 @@ export const PageWrapper: React.FC<PageWrapperProps> = ({
 }) => (
   <div className="flex flex-col h-full overflow-hidden">
     {/* ── Page header */}
-    <header
-      className="flex items-center justify-between flex-shrink-0"
-      style={{
-        height: 56,
-        padding: '0 24px',
-        background: 'var(--surface-1)',
-        borderBottom: '1px solid var(--border)',
-      }}
-    >
+    <header className="h-14 px-6 flex items-center justify-between flex-shrink-0 bg-[var(--surface-1)] border-b border-[var(--border)]">
       <div>
-        <h1
-          className="text-base font-semibold leading-tight"
-          style={{ color: 'var(--text-primary)' }}
-        >
+        <h1 className="text-base font-semibold leading-tight text-[var(--text-primary)]">
           {title}
         </h1>
         {subtitle && (
-          <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-xs mt-0.5 text-[var(--text-muted)]">
             {subtitle}
           </p>
         )}
@@ -41,10 +30,7 @@ export const PageWrapper: React.FC<PageWrapperProps> = ({
     </header>
 
     {/* ── Scrollable body */}
-    <main
-      className="flex-1 overflow-y-auto"
-      style={{ background: 'var(--surface-0)', padding: '20px 24px' }}
-    >
+    <main className="flex-1 overflow-y-auto bg-[var(--surface-0)] p-5 sm:p-6">
       {children}
     </main>
   </div>

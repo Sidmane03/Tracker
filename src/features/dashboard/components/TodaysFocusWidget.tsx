@@ -1,6 +1,6 @@
 import React from 'react'
 import { Sparkles } from 'lucide-react'
-import { Card } from '@/components/ui/'
+import { Card } from '@/components/ui'
 import { getRecommendedTopics } from '@/lib/engine'
 import { useStore } from '@/store'
 import type { ScoreBreakdown } from '@/lib/engine'
